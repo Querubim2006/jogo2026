@@ -15,56 +15,70 @@ class JogoTest {
         Jogo jogo = novoJogo("3.000", "146.99");
 
         assertEquals("7890000000001", jogo.getCodigoBarras());
-        assertEquals("PS4,PS5 e PC", jogo.getDescricao());
+        assertEquals("God of War Ragnarök", jogo.getTitulo());
         assertEquals(Status.ATIVO, jogo.getStatus());
-        assertEquals(LocalDate.of(2026, 8, 20), jogo.getDataCadastro());
+        assertEquals(LocalDate.of(2022, 11, 9), jogo.getDataLancamento());
     }
 
     @Test
-    void deveCalcularValorDosEstoques(){
+    void deveCalcularValorDosEstoques() {
         Jogo jogo = novoJogo("3.000", "146.99");
 
-        BigDecimal valorEstoque=jogo.calcularValorEstoque();
+        BigDecimal valorEstoque = jogo.calcularValorEstoque();
 
         assertEquals(0, new BigDecimal("440.97").compareTo(valorEstoque));
     }
 
     @Test
-    void deveReceberERetirarEstoque(){
-        Jogo jogo= novoJogo("3.000", "146.99");
+    void deveReceberERetirarEstoque() {
+        Jogo jogo = novoJogo("3.000", "146.99");
 
         jogo.receberEstoque(new BigDecimal("2.500"));
         jogo.retirarEstoque(new BigDecimal("1.000"));
 
-        assertEquals(0, new BigDecimal("4.500").compareTo(jogo.getSaldoEstoque()));
+        assertEquals(
+                0,
+                new BigDecimal("4.500").compareTo(jogo.getSaldoEstoque())
+        );
     }
 
     @Test
-    void naoDeveRetirarQuantidadeMaiorQueOSaldo(){
-        Jogo jogo=novoJogo("3.000", "146.99");
+    void naoDeveRetirarQuantidadeMaiorQueOSaldo() {
+        Jogo jogo = novoJogo("3.000", "146.99");
 
-        IllegalArgumentException excecao=assertThrows(IllegalArgumentException.class,
-                () -> jogo.retirarEstoque(new BigDecimal("3.001")));
+        IllegalArgumentException excecao = assertThrows(
+                IllegalArgumentException.class,
+                () -> jogo.retirarEstoque(new BigDecimal("3.001"))
+        );
 
-        assertEquals("Saldo de estoque insuficiente",excecao.getMessage());
+        assertEquals("Saldo de estoque insuficiente", excecao.getMessage());
     }
 
     @Test
-    void naoDeveCriarProdutoComCodigoEmBranco(){
-        assertThrows(IllegalArgumentException.class,
-                () -> new Jogo(" ","Corrida",
-                        BigDecimal.ZERO,new BigDecimal("146.99"),LocalDate.of(2026,8,20)));
+    void naoDeveCriarJogoComCodigoEmBranco() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Jogo(
+                        " ",
+                        "Forza Horizon 5",
+                        BigDecimal.ZERO,
+                        new BigDecimal("249.99"),
+                        LocalDate.of(2021, 11, 9)
+                )
+        );
     }
 
     @Test
-    void naoDeveCriarJogoComSaldoNegativo(){
-        assertThrows(IllegalArgumentException.class,
-                () -> novoJogo("-0.001","146.99"));
+    void naoDeveCriarJogoComSaldoNegativo() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> novoJogo("-0.001", "146.99")
+        );
     }
 
     @Test
-    void deveAlterarOStatusPorComportamentoExplicito(){
-        Jogo jogo = novoJogo("3.000","146.99");
+    void deveAlterarOStatusPorComportamentoExplicito() {
+        Jogo jogo = novoJogo("3.000", "146.99");
 
         jogo.desativar();
         assertEquals(Status.INATIVO, jogo.getStatus());
@@ -76,9 +90,10 @@ class JogoTest {
     private Jogo novoJogo(String saldo, String valorUnitario) {
         return new Jogo(
                 "7890000000001",
-                "PS4,PS5 e PC",
+                "God of War Ragnarök",
                 new BigDecimal(saldo),
                 new BigDecimal(valorUnitario),
-                LocalDate.of(2026, 8, 20));
+                LocalDate.of(2022, 11, 9)
+        );
     }
 }

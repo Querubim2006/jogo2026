@@ -5,72 +5,91 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GeneroJogoTest {
 
     @Test
-    void deveAdicionarProdutoEManejarOsDoisLadosDaAssociacao(){
-        GeneroJogo genero= new GeneroJogo("HackAndSlash");
-        Jogo jogo=novoJogo("7890000000001");
+    void deveAdicionarJogoEManterOsDoisLadosDaAssociacao() {
+        GeneroJogo genero = new GeneroJogo("Hack and Slash");
+        Jogo jogo = novoJogo("7890000000001");
 
         genero.adicionarJogo(jogo);
 
-        assertEquals(1,genero.getJogo().size());
-        assertSame(jogo,genero.getJogo().get(0));
+        assertEquals(1, genero.getJogos().size());
+        assertSame(jogo, genero.getJogos().get(0));
         assertSame(genero, jogo.getGenero());
     }
 
     @Test
-    void naooDeveAdicionarProdutoNulo(){
-        GeneroJogo genero= new GeneroJogo("HackAndSlash");
+    void naoDeveAdicionarJogoNulo() {
+        GeneroJogo genero = new GeneroJogo("Hack and Slash");
 
-        assertThrows(NullPointerException.class,()->genero.adicionarJogo(null));
+        assertThrows(
+                NullPointerException.class,
+                () -> genero.adicionarJogo(null)
+        );
     }
 
     @Test
-    void naoDeveAdicionarDoisProdutosComOMesmoCodigo(){
-        GeneroJogo genero= new GeneroJogo("HackAndSlash");
+    void naoDeveAdicionarDoisJogosComOMesmoCodigo() {
+        GeneroJogo genero = new GeneroJogo("Hack and Slash");
+
         genero.adicionarJogo(novoJogo("7890000000001"));
 
-        IllegalArgumentException excecao=assertThrows(
+        IllegalArgumentException excecao = assertThrows(
                 IllegalArgumentException.class,
-                ()->genero.adicionarJogo(novoJogo("7890000000001"))
+                () -> genero.adicionarJogo(novoJogo("7890000000001"))
         );
-        assertEquals("Código de barras já utilizado no gênero",excecao.getMessage());
+
+        assertEquals(
+                "Código de barras já utilizado no gênero",
+                excecao.getMessage()
+        );
     }
 
     @Test
-    void naoDevePermitirQueJogoPertençaADoisGeneros(){
-        GeneroJogo HackAndSlash= new GeneroJogo("HackAndSlash");
-        GeneroJogo Corrida = new GeneroJogo("Corrida");
+    void naoDevePermitirQueJogoPertençaADoisGeneros() {
+        GeneroJogo hackAndSlash = new GeneroJogo("Hack and Slash");
+        GeneroJogo corrida = new GeneroJogo("Corrida");
+
         Jogo jogo = novoJogo("7890000000001");
-        HackAndSlash.adicionarJogo(jogo);
 
-        IllegalStateException excecao= assertThrows(
+        hackAndSlash.adicionarJogo(jogo);
+
+        IllegalStateException excecao = assertThrows(
                 IllegalStateException.class,
-                ()-> Corrida.adicionarJogo(jogo));
+                () -> corrida.adicionarJogo(jogo)
+        );
 
-        assertEquals("O jogo indicado já pertence a outro gênero", excecao.getMessage());
+        assertEquals(
+                "O jogo indicado já pertence a outro gênero",
+                excecao.getMessage()
+        );
     }
 
     @Test
-    void naoDeveExporUmaListaInternaModificavel(){
-        GeneroJogo genero = new GeneroJogo("HackAndSlash");
-        Jogo jogo= novoJogo("7890000000001");
+    void naoDeveExporUmaListaInternaModificavel() {
+        GeneroJogo genero = new GeneroJogo("Hack and Slash");
+
+        Jogo jogo = novoJogo("7890000000001");
         genero.adicionarJogo(jogo);
 
-        assertThrows(UnsupportedOperationException.class,
-                ()-> genero.getJogo().add(novoJogo("7890000000002")));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> genero.getJogos().add(novoJogo("7890000000002"))
+        );
     }
 
-    private Jogo novoJogo(String codigoBarras){
+    private Jogo novoJogo(String codigoBarras) {
         return new Jogo(
                 codigoBarras,
-                "PS4 PS5 e PC",
+                "God of War Ragnarök",
                 new BigDecimal("3.000"),
                 new BigDecimal("146.99"),
-                LocalDate.of(2026,8,20));
+                LocalDate.of(2022, 11, 9)
+        );
     }
-
 }
