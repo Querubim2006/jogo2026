@@ -1,0 +1,124 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 003-01-create-desenvolvedora
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - createTable:
+            tableName: desenvolvedora
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_desenvolvedora
+                    nullable: false
+
+              - column:
+                  name: nome_fantasia
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: cnpj
+                  type: VARCHAR(14)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+      rollback:
+        - dropTable:
+            tableName: desenvolvedora
+
+  - changeSet:
+      id: 003-02-unique-cnpj-desenvolvedora
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - addUniqueConstraint:
+            tableName: desenvolvedora
+            columnNames: cnpj
+            constraintName: uk_desenvolvedora_cnpj
+
+      rollback:
+        - dropUniqueConstraint:
+            tableName: desenvolvedora
+            constraintName: uk_desenvolvedora_cnpj
+
+  - changeSet:
+      id: 003-03-check-status-desenvolvedora
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE desenvolvedora
+              ADD CONSTRAINT ck_desenvolvedora_status
+              CHECK (status IN ('ATIVO', 'INATIVO'))
+
+      rollback:
+        - sql:
+            sql: ALTER TABLE desenvolvedora DROP CONSTRAINT ck_desenvolvedora_status
+
+  - changeSet:
+      id: 003-04-add-estoque-minimo-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - addColumn:
+            tableName: jogo
+            columns:
+              - column:
+                  name: estoque_minimo
+                  type: NUMERIC(18,3)
+
+      rollback:
+        - dropColumn:
+            tableName: jogo
+            columnName: estoque_minimo
+
+  - changeSet:
+      id: 003-05-fill-estoque-minimo-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - update:
+            tableName: jogo
+            columns:
+              - column:
+                  name: estoque_minimo
+                  valueNumeric: 0
+            where: estoque_minimo IS NULL
+
+  - changeSet:
+      id: 003-06-not-null-estoque-minimo-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - addNotNullConstraint:
+            tableName: jogo
+            columnName: estoque_minimo
+            columnDataType: NUMERIC(18,3)
+
+      rollback:
+        - dropNotNullConstraint:
+            tableName: jogo
+            columnName: estoque_minimo
+            columnDataType: NUMERIC(18,3)
+
+  - changeSet:
+      id: 003-07-check-estoque-minimo-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE jogo
+              ADD CONSTRAINT ck_jogo_estoque_minimo
+              CHECK (estoque_minimo >= 0)
+
+      rollback:
+        - sql:
+            sql: ALTER TABLE jogo DROP CONSTRAINT ck_jogo_estoque_minimo

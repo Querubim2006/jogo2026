@@ -3,3 +3,9 @@ databaseChangeLog:
       file: db/changelog/changes/001-create-grupo-genero.yaml
   - include:
       file: db/changelog/changes/002-create-jogo.yaml
+  - include:
+      file: db/changelog/changes/003-desenvolvedora-e-estoque-minimo.yaml
+  - include:
+      file: db/changelog/changes/004-add-desenvolvedora-jogo.yaml
+  - include:
+      file: db/changelog/changes/005-check-titulo-jogo.yaml

@@ -1,0 +1,29 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 004-01-add-desenvolvedora-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - addColumn:
+            tableName: jogo
+            columns:
+              - column:
+                  name: desenvolvedora_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: jogo
+            baseColumnNames: desenvolvedora_id
+            referencedTableName: desenvolvedora
+            referencedColumnNames: id
+            constraintName: fk_jogo_desenvolvedora
+            onDelete: RESTRICT
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: jogo
+            constraintName: fk_jogo_desenvolvedora
+
+        - dropColumn:
+            tableName: jogo
+            columnName: desenvolvedora_id
