@@ -50,45 +50,42 @@ class PersistenciaJpaTest {
 
         assertEquals("RPG", recuperado.getGenero().getNome());
         assertEquals("Elden Ring", recuperado.getTitulo());
+        assertEquals(0, recuperado.getEstoqueMinimo().compareTo(BigDecimal.ZERO));
     }
 
     @Test
     @Transactional
-    void deveRegistrarOitoChangeSets() {
+    void deveRegistrarDezesseisChangeSets() {
         Number total = (Number) entityManager
                 .createNativeQuery("select count(*) from databasechangelog")
                 .getSingleResult();
 
-        assertEquals(8L, total.longValue());
+        assertEquals(17L, total.longValue());
     }
 
-    @Transactional
     @Test
+    @Transactional
     void deveRejeitarCodigoDeBarrasDuplicado() {
-        // 1. Cria a entidade principal
         GeneroJogo genero = new GeneroJogo("Ação");
 
-        // 2. Cria os dois jogos repassando PRIMEIRO o código de barras, DEPOIS o título
         Jogo jogo1 = new Jogo(
-                "7891000000033", // codigoBarras
-                "Elden Ring",    // titulo
+                "7891000000033",
+                "Elden Ring",
                 new BigDecimal("10.000"),
                 new BigDecimal("129.90"),
                 LocalDate.now()
         );
 
         Jogo jogo2 = new Jogo(
-                "7891000000033", // mesmo codigoBarras
+                "7891000000033",
                 "Elden Ring Remastered",
                 new BigDecimal("10.000"),
                 new BigDecimal("129.90"),
                 LocalDate.now()
         );
 
-        // 3. Adiciona o primeiro jogo
         genero.adicionarJogo(jogo1);
 
-        // 4. Garante a exceção ao adicionar o segundo
         Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> genero.adicionarJogo(jogo2)
@@ -112,7 +109,8 @@ class PersistenciaJpaTest {
                             valor_unitario,
                             data_lancamento,
                             status,
-                            genero_jogo_id
+                            genero_jogo_id,
+                            estoque_minimo
                         ) values (
                             '7891000000033',
                             'Elden Ring',
@@ -120,7 +118,8 @@ class PersistenciaJpaTest {
                             129.90,
                             '2026-06-01',
                             'ATIVO',
-                            :generoId
+                            :generoId,
+                            0
                         )
                         """)
                         .setParameter("generoId", genero.getId())

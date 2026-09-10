@@ -48,6 +48,9 @@ public class Jogo {
     @Column(name = "data_lancamento", nullable = false)
     private LocalDate dataLancamento;
 
+    @Column(name = "estoque_minimo", nullable = false, precision = 18, scale = 3)
+    private BigDecimal estoqueMinimo;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Status status;
@@ -60,15 +63,24 @@ public class Jogo {
     )
     private GeneroJogo genero;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "desenvolvedora_id",
+            foreignKey = @ForeignKey(name = "fk_jogo_desenvolvedora")
+    )
+    private Desenvolvedora desenvolvedora;
+
     protected Jogo() {
     }
 
+    // Construtor completo novo (recebe estoqueMinimo)
     public Jogo(
             String codigoBarras,
             String titulo,
             BigDecimal saldoEstoque,
             BigDecimal valorUnitario,
-            LocalDate dataLancamento
+            LocalDate dataLancamento,
+            BigDecimal estoqueMinimo
     ) {
         this.codigoBarras = validarTextoObrigatorio(
                 codigoBarras,
@@ -95,7 +107,23 @@ public class Jogo {
                 "Data de lançamento é obrigatória"
         );
 
+        this.estoqueMinimo = validarNaoNegativo(
+                estoqueMinimo,
+                "Estoque mínimo não pode ser negativo"
+        );
+
         this.status = Status.ATIVO;
+    }
+
+    // Construtor antigo preservado (delega BigDecimal.ZERO para estoqueMinimo)
+    public Jogo(
+            String codigoBarras,
+            String titulo,
+            BigDecimal saldoEstoque,
+            BigDecimal valorUnitario,
+            LocalDate dataLancamento
+    ) {
+        this(codigoBarras, titulo, saldoEstoque, valorUnitario, dataLancamento, BigDecimal.ZERO);
     }
 
     public Long getId() {
@@ -167,6 +195,10 @@ public class Jogo {
         this.genero = genero;
     }
 
+    public void associarDesenvolvedora(Desenvolvedora desenvolvedora) {
+        this.desenvolvedora = desenvolvedora;
+    }
+
     public String getCodigoBarras() {
         return codigoBarras;
     }
@@ -187,12 +219,20 @@ public class Jogo {
         return dataLancamento;
     }
 
+    public BigDecimal getEstoqueMinimo() {
+        return estoqueMinimo;
+    }
+
     public Status getStatus() {
         return status;
     }
 
     public GeneroJogo getGenero() {
         return genero;
+    }
+
+    public Desenvolvedora getDesenvolvedora() {
+        return desenvolvedora;
     }
 
     private static String validarTextoObrigatorio(

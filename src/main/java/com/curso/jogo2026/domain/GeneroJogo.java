@@ -88,7 +88,7 @@ public class GeneroJogo {
         return List.copyOf(jogos);
     }
 
-    private static String validarTextoObrigatorio(
+    public static String validarTextoObrigatorio(
             String texto,
             String mensagem
     ) {

@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 005-01-check-titulo-jogo
+      author: Vitor-Querubim-de-Oliveira
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE jogo
+              ADD CONSTRAINT ck_jogo_titulo_nao_vazio
+              CHECK (length(trim(titulo)) > 0)
+      rollback:
+        - sql:
+            sql: >
+              ALTER TABLE jogo
+              DROP CONSTRAINT ck_jogo_titulo_nao_vazio
