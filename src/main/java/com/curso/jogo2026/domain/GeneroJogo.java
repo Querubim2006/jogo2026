@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,17 +49,27 @@ public class GeneroJogo {
         return id;
     }
 
+    public void alterarNome(String novoNome) {
+        this.nome = validarTextoObrigatorio(
+                novoNome,
+                "Nome do gênero é obrigatório"
+        );
+    }
+
     public void adicionarJogo(Jogo jogo) {
         Objects.requireNonNull(jogo, "Jogo é obrigatório");
 
-        // Valida se já existe algum jogo na lista com o mesmo código de barras (comparando Strings)
         boolean codigoJaUtilizado = jogos.stream()
-                .map(Jogo::getCodigoBarras) // Obtém o código de barras de cada item
+                .map(Jogo::getCodigoBarras)
                 .filter(Objects::nonNull)
-                .anyMatch(codigo -> codigo.equalsIgnoreCase(jogo.getCodigoBarras()));
+                .anyMatch(codigo ->
+                        codigo.equalsIgnoreCase(jogo.getCodigoBarras())
+                );
 
         if (codigoJaUtilizado) {
-            throw new IllegalArgumentException("Código de barras já utilizado no gênero");
+            throw new RecursoDuplicadoException(
+                    "Código de barras já utilizado no gênero"
+            );
         }
 
         jogo.associarAo(this);

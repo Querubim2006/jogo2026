@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,8 +40,8 @@ class GeneroJogoTest {
 
         genero.adicionarJogo(novoJogo("7890000000001"));
 
-        IllegalArgumentException excecao = assertThrows(
-                IllegalArgumentException.class,
+        RecursoDuplicadoException excecao = assertThrows(
+                RecursoDuplicadoException.class,
                 () -> genero.adicionarJogo(novoJogo("7890000000001"))
         );
 

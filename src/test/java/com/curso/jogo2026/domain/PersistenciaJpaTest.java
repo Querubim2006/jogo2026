@@ -1,5 +1,6 @@
 package com.curso.jogo2026.domain;
 
+import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
@@ -87,7 +88,7 @@ class PersistenciaJpaTest {
         genero.adicionarJogo(jogo1);
 
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                RecursoDuplicadoException.class,
                 () -> genero.adicionarJogo(jogo2)
         );
     }

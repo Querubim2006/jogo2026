@@ -41,7 +41,11 @@ class JogoServiceTest {
                 LocalDate.now()
         );
 
-        Jogo cadastrado = jogoService.cadastrar(jogo, genero.getId());
+        Jogo cadastrado = jogoService.cadastrar(
+                jogo,
+                genero.getId(),
+                null
+        );
 
         assertNotNull(cadastrado.getId());
         assertEquals(genero.getId(), cadastrado.getGenero().getId());
@@ -59,8 +63,11 @@ class JogoServiceTest {
 
         assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> jogoService.cadastrar(jogo, Long.MAX_VALUE)
-        );
+                () -> jogoService.cadastrar(
+                        jogo,
+                        Long.MAX_VALUE,
+                        null
+                ));
 
         assertFalse(JogoRepository.existsByCodigoBarras(jogo.getCodigoBarras()));
     }

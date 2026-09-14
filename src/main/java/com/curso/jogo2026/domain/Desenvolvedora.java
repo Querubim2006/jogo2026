@@ -1,7 +1,5 @@
 package com.curso.jogo2026.domain;
 
-
-import com.curso.jogo2026.domain.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,12 +40,14 @@ public class Desenvolvedora {
     }
 
     public Desenvolvedora(String nomeFantasia, String cnpj) {
-        this.nomeFantasia = validarTextoObrigatorio(nomeFantasia, "Nome fantasia é obrigatório.");
+        this.nomeFantasia = validarTextoObrigatorio(
+                nomeFantasia,
+                "Nome fantasia é obrigatório."
+        );
         this.cnpj = validarCnpj(cnpj);
         this.status = Status.ATIVO;
     }
 
-    // Getters
     public Long getId() {
         return id;
     }
@@ -63,11 +63,30 @@ public class Desenvolvedora {
     public Status getStatus() {
         return status;
     }
+
+    public void alterarNomeFantasia(String novoNomeFantasia) {
+        this.nomeFantasia = validarTextoObrigatorio(
+                novoNomeFantasia,
+                "Nome fantasia é obrigatório."
+        );
+    }
+
+    public void alterarCnpj(String novoCnpj) {
+        this.cnpj = validarCnpj(novoCnpj);
+    }
+
     private String validarCnpj(String cnpj) {
-        String cnpjLimpo = validarTextoObrigatorio(cnpj, "CNPJ é obrigatório").replaceAll("\\D", "");
+        String cnpjLimpo = validarTextoObrigatorio(
+                cnpj,
+                "CNPJ é obrigatório"
+        ).replaceAll("\\D", "");
+
         if (cnpjLimpo.length() != 14) {
-            throw new IllegalArgumentException("O CNPJ deve conter exatamente 14 dígitos.");
+            throw new IllegalArgumentException(
+                    "O CNPJ deve conter exatamente 14 dígitos."
+            );
         }
+
         return cnpjLimpo;
     }
 }
