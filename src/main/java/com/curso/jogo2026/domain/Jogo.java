@@ -73,7 +73,6 @@ public class Jogo {
     protected Jogo() {
     }
 
-    // Construtor completo novo (recebe estoqueMinimo)
     public Jogo(
             String codigoBarras,
             String titulo,
@@ -115,7 +114,6 @@ public class Jogo {
         this.status = Status.ATIVO;
     }
 
-    // Construtor antigo preservado (delega BigDecimal.ZERO para estoqueMinimo)
     public Jogo(
             String codigoBarras,
             String titulo,
@@ -123,7 +121,14 @@ public class Jogo {
             BigDecimal valorUnitario,
             LocalDate dataLancamento
     ) {
-        this(codigoBarras, titulo, saldoEstoque, valorUnitario, dataLancamento, BigDecimal.ZERO);
+        this(
+                codigoBarras,
+                titulo,
+                saldoEstoque,
+                valorUnitario,
+                dataLancamento,
+                BigDecimal.ZERO
+        );
     }
 
     public Long getId() {
@@ -152,7 +157,9 @@ public class Jogo {
         );
 
         if (saldoEstoque.compareTo(quantidade) < 0) {
-            throw new IllegalArgumentException("Saldo de estoque insuficiente");
+            throw new IllegalArgumentException(
+                    "Saldo de estoque insuficiente"
+            );
         }
 
         this.saldoEstoque = saldoEstoque.subtract(quantidade);
@@ -172,6 +179,39 @@ public class Jogo {
         );
     }
 
+    public void alterarDados(
+            String novoCodigoBarras,
+            String novoTitulo,
+            BigDecimal novoSaldoEstoque,
+            BigDecimal novoValorUnitario,
+            LocalDate novaDataLancamento,
+            BigDecimal novoEstoqueMinimo
+    ) {
+        this.codigoBarras = validarTextoObrigatorio(
+                novoCodigoBarras,
+                "Código de barras é obrigatório"
+        );
+
+        alterarTitulo(novoTitulo);
+
+        this.saldoEstoque = validarNaoNegativo(
+                novoSaldoEstoque,
+                "Saldo de estoque não pode ser negativo"
+        );
+
+        alterarValorUnitario(novoValorUnitario);
+
+        this.dataLancamento = Objects.requireNonNull(
+                novaDataLancamento,
+                "Data de lançamento é obrigatória"
+        );
+
+        this.estoqueMinimo = validarNaoNegativo(
+                novoEstoqueMinimo,
+                "Estoque mínimo não pode ser negativo"
+        );
+    }
+
     public void ativar() {
         this.status = Status.ATIVO;
     }
@@ -180,7 +220,7 @@ public class Jogo {
         this.status = Status.INATIVO;
     }
 
-    void associarAo(GeneroJogo genero) {
+    public void associarAo(GeneroJogo genero) {
         Objects.requireNonNull(
                 genero,
                 "Gênero do jogo é obrigatório"

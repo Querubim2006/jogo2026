@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-01-compatibilidade-para-titulo
+      author: Vitor-Querubim-de-Oliveira
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            tableName: jogo
+            columnName: compatibilidade
+      changes:
+        - renameColumn:
+            tableName: jogo
+            oldColumnName: compatibilidade
+            newColumnName: titulo
+            columnDataType: varchar(150)
+      rollback:
+        - renameColumn:
+            tableName: jogo
+            oldColumnName: titulo
+            newColumnName: compatibilidade
+            columnDataType: varchar(150)
