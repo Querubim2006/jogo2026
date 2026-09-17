@@ -36,7 +36,7 @@ public class JogoService {
             Long generoId,
             Long desenvolvedoraId
     ) {
-        if (JogoRepository.existsByCodigoBarras(jogo.getCodigoBarras())) {
+        if (jogoRepository.existsByCodigoBarras(jogo.getCodigoBarras())) {
             throw new RecursoDuplicadoException(
                     "Código de barras já cadastrado"
             );
@@ -96,7 +96,7 @@ public class JogoService {
                 );
 
         if (!jogoExistente.getCodigoBarras().equals(jogo.getCodigoBarras())
-                && JogoRepository.existsByCodigoBarras(jogo.getCodigoBarras())) {
+                && jogoRepository.existsByCodigoBarras(jogo.getCodigoBarras())) {
             throw new RecursoDuplicadoException(
                     "Código de barras já cadastrado"
             );

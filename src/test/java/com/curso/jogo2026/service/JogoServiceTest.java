@@ -29,9 +29,12 @@ class JogoServiceTest {
 
     @Autowired
     private JogoRepository jogoRepository;
+
     @Test
     void deveCadastrarJogoComGenero() {
-        GeneroJogo genero = generoRepository.save(new GeneroJogo("Ação"));
+        GeneroJogo genero = generoRepository.save(
+                new GeneroJogo("Ação")
+        );
 
         Jogo jogo = new Jogo(
                 "7891000000099",
@@ -48,7 +51,10 @@ class JogoServiceTest {
         );
 
         assertNotNull(cadastrado.getId());
-        assertEquals(genero.getId(), cadastrado.getGenero().getId());
+        assertEquals(
+                genero.getId(),
+                cadastrado.getGenero().getId()
+        );
     }
 
     @Test
@@ -67,8 +73,13 @@ class JogoServiceTest {
                         jogo,
                         Long.MAX_VALUE,
                         null
-                ));
+                )
+        );
 
-        assertFalse(JogoRepository.existsByCodigoBarras(jogo.getCodigoBarras()));
+        assertFalse(
+                jogoRepository.existsByCodigoBarras(
+                        jogo.getCodigoBarras()
+                )
+        );
     }
 }
