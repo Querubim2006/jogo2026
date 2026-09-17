@@ -61,7 +61,7 @@ class PersistenciaJpaTest {
                 .createNativeQuery("select count(*) from databasechangelog")
                 .getSingleResult();
 
-        assertEquals(17L, total.longValue());
+        assertEquals(18L, total.longValue());
     }
 
     @Test
