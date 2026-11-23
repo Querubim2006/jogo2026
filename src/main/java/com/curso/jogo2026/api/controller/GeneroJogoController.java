@@ -2,15 +2,17 @@ package com.curso.jogo2026.api.controller;
 
 import com.curso.jogo2026.api.dto.GeneroJogoRequest;
 import com.curso.jogo2026.api.dto.GeneroJogoResponse;
+import com.curso.jogo2026.api.dto.StatusRequest;
 import com.curso.jogo2026.api.mapper.GeneroJogoMapper;
 import com.curso.jogo2026.domain.GeneroJogo;
+import com.curso.jogo2026.domain.Status;
+import com.curso.jogo2026.dto.PaginaResponse;
 import com.curso.jogo2026.service.GeneroJogoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/generos")
@@ -50,11 +52,16 @@ public class GeneroJogoController {
     }
 
     @GetMapping
-    public List<GeneroJogoResponse> listar() {
-        return service.listar()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public PaginaResponse<GeneroJogoResponse> pesquisar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Status status,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamanho,
+            @RequestParam(defaultValue = "id") String ordenarPor,
+            @RequestParam(defaultValue = "ASC") String direcao) {
+        return PaginaResponse.de(
+                service.pesquisar(nome, status, pagina, tamanho, ordenarPor, direcao),
+                mapper::toResponse);
     }
 
     @PutMapping("/{id}")
@@ -68,6 +75,13 @@ public class GeneroJogoController {
         );
 
         return mapper.toResponse(genero);
+    }
+
+    @PutMapping("/{id}/status")
+    public GeneroJogoResponse alterarStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody StatusRequest request) {
+        return mapper.toResponse(service.alterarStatus(id, request.status()));
     }
 
     @DeleteMapping("/{id}")

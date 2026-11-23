@@ -18,6 +18,6 @@ public record JogoResponse(
         Long generoId,
         String generoNome,
         Long desenvolvedoraId,
-        String desenvolvedoraNomeFantasia
-) {
+        String desenvolvedoraNome
+){
 }

@@ -1,12 +1,16 @@
 package com.curso.jogo2026.domain;
 
+import com.curso.jogo2026.domain.GeneroJogo;
+import com.curso.jogo2026.domain.Jogo;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.curso.jogo2026.exception.RecursoDuplicadoException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -69,6 +73,20 @@ class GeneroJogoTest {
                 "O jogo indicado já pertence a outro gênero",
                 excecao.getMessage()
         );
+    }
+
+    @Test
+    void deveTransferirJogoAtualizandoOsDoisLadosDaAssociacao() {
+        GeneroJogo acao = new GeneroJogo("Ação");
+        GeneroJogo aventura = new GeneroJogo("Aventura");
+        Jogo jogo = novoJogo("7890000000001");
+        acao.adicionarJogo(jogo);
+
+        jogo.transferirPara(aventura);
+
+        assertFalse(acao.getJogos().contains(jogo));
+        assertSame(aventura, jogo.getGenero());
+        assertSame(jogo, aventura.getJogos().get(0));
     }
 
     @Test

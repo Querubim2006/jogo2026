@@ -1,3 +1,4 @@
+
 package com.curso.jogo2026.domain;
 
 import java.math.BigDecimal;
@@ -182,7 +183,6 @@ public class Jogo {
     public void alterarDados(
             String novoCodigoBarras,
             String novoTitulo,
-            BigDecimal novoSaldoEstoque,
             BigDecimal novoValorUnitario,
             LocalDate novaDataLancamento,
             BigDecimal novoEstoqueMinimo
@@ -193,11 +193,6 @@ public class Jogo {
         );
 
         alterarTitulo(novoTitulo);
-
-        this.saldoEstoque = validarNaoNegativo(
-                novoSaldoEstoque,
-                "Saldo de estoque não pode ser negativo"
-        );
 
         alterarValorUnitario(novoValorUnitario);
 
@@ -220,7 +215,7 @@ public class Jogo {
         this.status = Status.INATIVO;
     }
 
-    public void associarAo(GeneroJogo genero) {
+    void associarAo(GeneroJogo genero) {
         Objects.requireNonNull(
                 genero,
                 "Gênero do jogo é obrigatório"
@@ -235,8 +230,28 @@ public class Jogo {
         this.genero = genero;
     }
 
-    public void associarDesenvolvedora(Desenvolvedora desenvolvedora) {
+    public void associarDesenvolvedora(
+            Desenvolvedora desenvolvedora
+    ) {
         this.desenvolvedora = desenvolvedora;
+    }
+
+    public void transferirPara(GeneroJogo novoGenero) {
+        Objects.requireNonNull(
+                novoGenero,
+                "Gênero do jogo é obrigatório"
+        );
+
+        if (this.genero == novoGenero) {
+            return;
+        }
+
+        novoGenero.validarInclusao(this);
+        if (this.genero != null) {
+            this.genero.removerInternamente(this);
+        }
+        this.genero = novoGenero;
+        novoGenero.adicionarInternamente(this);
     }
 
     public String getCodigoBarras() {

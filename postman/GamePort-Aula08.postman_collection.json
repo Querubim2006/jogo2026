@@ -1,0 +1,199 @@
+{
+  "info": {
+    "_postman_id": "5cf75c03-cd20-4c02-9fb3-6d6414c9bb75",
+    "name": "GamePort - Aula 08",
+    "description": "CRUD, status, estoque e consultas paginadas para jogos e gêneros.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "generoId", "value": "" },
+    { "key": "desenvolvedoraId", "value": "" },
+    { "key": "jogoId", "value": "" },
+    { "key": "runId", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.collectionVariables.set('runId', Date.now().toString());"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Preparar dados",
+      "item": [
+        {
+          "name": "Criar gênero",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Gênero {{runId}}\"\n}" },
+            "url": "{{baseUrl}}/api/generos"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Gênero criado', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('generoId', pm.response.json().id);"
+          ] } }]
+        },
+        {
+          "name": "Criar desenvolvedora",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nomeFantasia\": \"Estúdio {{runId}}\",\n  \"cnpj\": \"{{cnpj}}\"\n}" },
+            "url": "{{baseUrl}}/api/desenvolvedoras"
+          },
+          "event": [{ "listen": "prerequest", "script": { "type": "text/javascript", "exec": [
+            "pm.collectionVariables.set('cnpj', Date.now().toString().padStart(14, '0').slice(-14));"
+          ] } }, { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Desenvolvedora criada', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('desenvolvedoraId', pm.response.json().id);"
+          ] } }]
+        },
+        {
+          "name": "Criar jogo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigoBarras\": \"GP-{{runId}}\",\n  \"titulo\": \"Jogo {{runId}}\",\n  \"saldoEstoque\": 5,\n  \"valorUnitario\": 199.90,\n  \"dataLancamento\": \"2026-09-10\",\n  \"estoqueMinimo\": 2,\n  \"generoId\": {{generoId}},\n  \"desenvolvedoraId\": {{desenvolvedoraId}}\n}" },
+            "url": "{{baseUrl}}/api/jogos"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Jogo criado', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('jogoId', pm.response.json().id);"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "02 - Manutenção e consultas",
+      "item": [
+        {
+          "name": "Alterar gênero",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Gênero atualizado {{runId}}\"\n}" },
+            "url": "{{baseUrl}}/api/generos/{{generoId}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Gênero alterado', () => pm.response.to.have.status(200));"
+          ] } }]
+        },
+        {
+          "name": "Inativar gênero",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"INATIVO\"\n}" },
+            "url": "{{baseUrl}}/api/generos/{{generoId}}/status"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Gênero inativado', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql('INATIVO'); });"
+          ] } }]
+        },
+        {
+          "name": "Pesquisar gêneros por status",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/generos?status=INATIVO&pagina=0&tamanho=10&ordenarPor=nome&direcao=ASC" }
+        },
+        {
+          "name": "Alterar jogo sem mexer no saldo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Jogo atualizado {{runId}}\",\n  \"valorUnitario\": 219.90,\n  \"dataLancamento\": \"2026-09-10\",\n  \"estoqueMinimo\": 2,\n  \"generoId\": {{generoId}},\n  \"desenvolvedoraId\": {{desenvolvedoraId}}\n}" },
+            "url": "{{baseUrl}}/api/jogos/{{jogoId}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Atualização mantém saldo', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldoEstoque).to.eql(5); });"
+          ] } }]
+        },
+        {
+          "name": "Inativar jogo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"INATIVO\"\n}" },
+            "url": "{{baseUrl}}/api/jogos/{{jogoId}}/status"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Jogo inativado', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql('INATIVO'); });"
+          ] } }]
+        },
+        {
+          "name": "Entrada de estoque",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantidade\": 3\n}" },
+            "url": "{{baseUrl}}/api/jogos/{{jogoId}}/estoque/entradas"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Entrada registrada', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().saldoEstoque).to.eql(8); });"
+          ] } }]
+        },
+        {
+          "name": "Saída maior que o saldo retorna 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantidade\": 999\n}" },
+            "url": "{{baseUrl}}/api/jogos/{{jogoId}}/estoque/saidas"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Saída inválida rejeitada', () => pm.response.to.have.status(400));"
+          ] } }]
+        },
+        {
+          "name": "Pesquisar jogos abaixo do estoque mínimo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/jogos?abaixoEstoqueMinimo=true&pagina=0&tamanho=10&ordenarPor=titulo&direcao=ASC" }
+        },
+        {
+          "name": "Ordenação por associação retorna 400",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/jogos?ordenarPor=genero.nome" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Campo de ordenação não permitido', () => pm.response.to.have.status(400));"
+          ] } }]
+        },
+        {
+          "name": "Excluir gênero em uso retorna 409",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/generos/{{generoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Gênero em uso preservado', () => pm.response.to.have.status(409));"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "03 - Limpeza (execute por último)",
+      "item": [
+        {
+          "name": "Excluir jogo",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/jogos/{{jogoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Jogo removido sem corpo', () => { pm.response.to.have.status(204); pm.expect(pm.response.text()).to.eql(''); });"
+          ] } }]
+        },
+        {
+          "name": "Excluir gênero",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/generos/{{generoId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Gênero removido sem corpo', () => { pm.response.to.have.status(204); pm.expect(pm.response.text()).to.eql(''); });"
+          ] } }]
+        },
+        {
+          "name": "Excluir desenvolvedora",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/desenvolvedoras/{{desenvolvedoraId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Desenvolvedora removida sem corpo', () => { pm.response.to.have.status(204); pm.expect(pm.response.text()).to.eql(''); });"
+          ] } }]
+        }
+      ]
+    }
+  ]
+}

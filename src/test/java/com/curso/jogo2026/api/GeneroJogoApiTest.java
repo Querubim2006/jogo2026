@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
@@ -58,5 +59,40 @@ class GeneroJogoApiTest {
     void deveRetornar404QuandoGeneroNaoExistir() throws Exception {
         mockMvc.perform(get("/api/generos/999999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void devePesquisarGenerosComFiltroEPaginacao() throws Exception {
+        mockMvc.perform(post("/api/generos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Corrida de Teste\"}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/generos")
+                        .param("nome", "corrida")
+                        .param("status", "ATIVO")
+                        .param("pagina", "0")
+                        .param("tamanho", "5")
+                        .param("ordenarPor", "nome"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.conteudo.length()").value(1))
+                .andExpect(jsonPath("$.pagina").value(0))
+                .andExpect(jsonPath("$.tamanho").value(5));
+    }
+
+    @Test
+    void deveAlterarStatusDoGeneroPorPut() throws Exception {
+        String resposta = mockMvc.perform(post("/api/generos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Gênero para status\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Number id = com.jayway.jsonpath.JsonPath.read(resposta, "$.id");
+
+        mockMvc.perform(put("/api/generos/{id}/status", id.longValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"INATIVO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("INATIVO"));
     }
 }
