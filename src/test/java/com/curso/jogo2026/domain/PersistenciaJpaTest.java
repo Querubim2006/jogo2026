@@ -64,12 +64,12 @@ class PersistenciaJpaTest {
 
     @Test
     @Transactional
-    void deveRegistrarDezenoveChangeSets() {
+    void deveRegistrarChangeSetsDasMigracoesAteAulaDez() {
         Number total = (Number) entityManager
                 .createNativeQuery("select count(*) from databasechangelog")
                 .getSingleResult();
 
-        assertEquals(19L, total.longValue());
+        assertEquals(27L, total.longValue());
     }
 
     @Test

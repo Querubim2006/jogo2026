@@ -1,0 +1,20 @@
+package com.curso.jogo2026.domain;
+
+import jakarta.persistence.*;
+import java.util.Objects;
+
+@Entity
+@Table(name = "cliente", uniqueConstraints = @UniqueConstraint(name = "uk_cliente_pessoa", columnNames = "pessoa_id"))
+public class Cliente {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "pessoa_id", nullable = false, unique = true, foreignKey = @ForeignKey(name = "fk_cliente_pessoa"))
+    private Pessoa pessoa;
+    @Column(length = 30) private String telefone;
+    protected Cliente() { }
+    public Cliente(Pessoa pessoa, String telefone) { this.pessoa = Objects.requireNonNull(pessoa, "Pessoa é obrigatória"); alterarDados(telefone); }
+    public void alterarDados(String telefone) { this.telefone = telefone == null || telefone.isBlank() ? null : telefone.trim(); }
+    public Long getId() { return id; }
+    public Pessoa getPessoa() { return pessoa; }
+    public String getTelefone() { return telefone; }
+}

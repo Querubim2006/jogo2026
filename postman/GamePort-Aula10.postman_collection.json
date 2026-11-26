@@ -1,0 +1,132 @@
+{
+  "info": {
+    "_postman_id": "a10b76f1-09ce-4c71-a3c1-8912a06a1001",
+    "name": "GamePort - Aula 10 Pessoas e Vendas",
+    "description": "Fluxo de teste da Aula 10: CPF/CNPJ válidos, papéis por composição, fornecedor, preço histórico, finalização transacional e cancelamento.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "generoId", "value": "" },
+    { "key": "clienteId", "value": "" },
+    { "key": "pessoaClienteId", "value": "" },
+    { "key": "colaboradorId", "value": "" },
+    { "key": "pessoaColaboradorId", "value": "" },
+    { "key": "fornecedorId", "value": "" },
+    { "key": "jogoId", "value": "" },
+    { "key": "vendaId", "value": "" },
+    { "key": "vendaCanceladaId", "value": "" },
+    { "key": "itemId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Criar gênero de teste",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"{{nomeGenero}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/generos" },
+      "event": [{ "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('nomeGenero','GamePort Aula 10 '+Date.now());"] } },{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Gênero criado', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('generoId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "02 - Criar pessoa cliente (CPF gerado)",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Cliente GamePort\",\n  \"email\": \"{{emailCliente}}\",\n  \"cpf\": \"{{cpfCliente}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/pessoas" },
+      "event": [
+        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["function dv(s,w){var n=0;for(var i=0;i<s.length;i++)n+=Number(s[i])*w[i];var r=n%11;return r<2?0:11-r;}", "function cpf(){var b=String(Math.floor(100000000+Math.random()*900000000));var d1=dv(b,[10,9,8,7,6,5,4,3,2]);var x=b+d1;return x+dv(x,[11,10,9,8,7,6,5,4,3,2]);}", "pm.collectionVariables.set('cpfCliente',cpf());pm.collectionVariables.set('emailCliente','cliente'+Date.now()+'@example.com');"] } },
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Pessoa cliente criada', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('pessoaClienteId',pm.response.json().id);"] } }
+      ]
+    },
+    {
+      "name": "03 - Associar papel de cliente",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"pessoaId\": {{pessoaClienteId}},\n  \"telefone\": \"11999990000\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/clientes" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Cliente criado', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('clienteId',pm.response.json().id);"] } }]
+    },
+    {
+      "name": "04 - Criar pessoa colaboradora (CPF gerado)",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Vendedor GamePort\",\n  \"email\": \"{{emailColaborador}}\",\n  \"cpf\": \"{{cpfColaborador}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/pessoas" },
+      "event": [
+        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["function dv(s,w){var n=0;for(var i=0;i<s.length;i++)n+=Number(s[i])*w[i];var r=n%11;return r<2?0:11-r;}", "function cpf(){var b=String(Math.floor(100000000+Math.random()*900000000));var d1=dv(b,[10,9,8,7,6,5,4,3,2]);var x=b+d1;return x+dv(x,[11,10,9,8,7,6,5,4,3,2]);}", "pm.collectionVariables.set('cpfColaborador',cpf());pm.collectionVariables.set('emailColaborador','vendedor'+Date.now()+'@example.com');"] } },
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Pessoa colaboradora criada', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('pessoaColaboradorId',pm.response.json().id);"] } }
+      ]
+    },
+    {
+      "name": "05 - Cadastrar colaborador vendedor",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"pessoaId\": {{pessoaColaboradorId}},\n  \"matricula\": \"VEN-{{pessoaColaboradorId}}\",\n  \"funcao\": \"VENDEDOR\",\n  \"dataAdmissao\": \"2026-09-29\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/colaboradores" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Colaborador criado', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('colaboradorId',pm.response.json().id);"] } }]
+    },
+    {
+      "name": "06 - Cadastrar fornecedor (CNPJ gerado)",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razaoSocial\": \"Distribuidora GamePort Teste\",\n  \"cnpj\": \"{{cnpjFornecedor}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/fornecedores" },
+      "event": [
+        { "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["function dv(s,w){var n=0;for(var i=0;i<s.length;i++)n+=Number(s[i])*w[i];var r=n%11;return r<2?0:11-r;}", "function cnpj(){var b=''+Math.floor(100000000000+Math.random()*900000000000);var w1=[5,4,3,2,9,8,7,6,5,4,3,2],d1=dv(b,w1),x=b+d1,w2=[6,5,4,3,2,9,8,7,6,5,4,3,2];return x+dv(x,w2);}", "pm.collectionVariables.set('cnpjFornecedor',cnpj());"] } },
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Fornecedor criado', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('fornecedorId',pm.response.json().id);"] } }
+      ]
+    },
+    {
+      "name": "07 - Cadastrar jogo com fornecedor",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigoBarras\": \"GP-A10-{{timestamp}}\",\n  \"titulo\": \"Jogo de Venda Aula 10\",\n  \"saldoEstoque\": 5.000,\n  \"valorUnitario\": 10.00,\n  \"dataLancamento\": \"2026-01-10\",\n  \"estoqueMinimo\": 1.000,\n  \"generoId\": {{generoId}},\n  \"desenvolvedoraId\": null,\n  \"fornecedorId\": {{fornecedorId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/jogos" },
+      "event": [{ "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('timestamp',String(Date.now()));"] } },{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Jogo criado e associado ao fornecedor', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('jogoId',pm.response.json().id);"] } }]
+    },
+    {
+      "name": "08 - Abrir venda",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"vendedorId\": {{colaboradorId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/vendas" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Venda aberta', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('vendaId',pm.response.json().id);"] } }]
+    },
+    {
+      "name": "09 - Incluir jogo na venda",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{jogoId}},\n  \"quantidade\": 2.000\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/vendas/{{vendaId}}/itens" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Item incluído', function () { pm.response.to.have.status(200); });", "var itens=pm.response.json().itens;pm.collectionVariables.set('itemId',itens[itens.length-1].id);"] } }]
+    },
+    {
+      "name": "10 - Remover item da venda aberta",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/vendas/{{vendaId}}/itens/{{itemId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Item removido enquanto venda aberta', function () { pm.response.to.have.status(200); });", "pm.test('A venda ficou sem itens', function () { pm.expect(pm.response.json().itens).to.have.length(0); });"] } }]
+    },
+    {
+      "name": "11 - Reincluir jogo na venda",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{jogoId}},\n  \"quantidade\": 2.000\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/vendas/{{vendaId}}/itens" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Item reincluído', function () { pm.response.to.have.status(200); });", "var itens=pm.response.json().itens;pm.collectionVariables.set('itemId',itens[itens.length-1].id);"] } }]
+    },
+    {
+      "name": "12 - Alterar preço atual do jogo",
+      "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Jogo de Venda Aula 10\",\n  \"valorUnitario\": 15.00,\n  \"dataLancamento\": \"2026-01-10\",\n  \"estoqueMinimo\": 1.000,\n  \"generoId\": {{generoId}},\n  \"desenvolvedoraId\": null,\n  \"fornecedorId\": {{fornecedorId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/jogos/{{jogoId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Preço atual alterado', function () { pm.response.to.have.status(200); });"] } }]
+    },
+    {
+      "name": "13 - Conferir preço histórico da venda",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/vendas/{{vendaId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Preço do item continua sendo o preço da inclusão', function () { pm.response.to.have.status(200);pm.expect(pm.response.json().itens[0].valorUnitario).to.eql(10.00);pm.expect(pm.response.json().total).to.eql(20.00); });"] } }]
+    },
+    {
+      "name": "14 - Finalizar venda e baixar estoque",
+      "request": { "method": "POST", "url": "{{baseUrl}}/api/vendas/{{vendaId}}/finalizacao" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Venda finalizada', function () { pm.response.to.have.status(200);pm.expect(pm.response.json().status).to.eql('FINALIZADA'); });"] } }]
+    },
+    {
+      "name": "14b - Confirmar saldo após a venda",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/jogos/{{jogoId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Estoque baixado exatamente pela quantidade vendida', function () { pm.response.to.have.status(200);pm.expect(pm.response.json().saldoEstoque).to.eql(3.000); });"] } }]
+    },
+    {
+      "name": "14c - Repetir finalização não repete baixa",
+      "request": { "method": "POST", "url": "{{baseUrl}}/api/vendas/{{vendaId}}/finalizacao" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('A venda finalizada não baixa estoque novamente', function () { pm.response.to.have.status(400); });"] } }]
+    },
+    {
+      "name": "15 - Abrir outra venda para cancelamento",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"vendedorId\": {{colaboradorId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/vendas" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Segunda venda aberta', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('vendaCanceladaId',pm.response.json().id);"] } }]
+    },
+    {
+      "name": "16 - Venda vazia não pode ser finalizada",
+      "request": { "method": "POST", "url": "{{baseUrl}}/api/vendas/{{vendaCanceladaId}}/finalizacao" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Venda vazia continua aberta', function () { pm.response.to.have.status(400); });"] } }]
+    },
+    {
+      "name": "16b - Cancelar venda aberta",
+      "request": { "method": "POST", "url": "{{baseUrl}}/api/vendas/{{vendaCanceladaId}}/cancelamento" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Venda cancelada', function () { pm.response.to.have.status(200);pm.expect(pm.response.json().status).to.eql('CANCELADA'); });"] } }]
+    },
+    {
+      "name": "17 - Produto vendido não pode ser excluído",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/jogos/{{jogoId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Histórico impede exclusão do jogo', function () { pm.response.to.have.status(409); });"] } }]
+    }
+  ]
+}
