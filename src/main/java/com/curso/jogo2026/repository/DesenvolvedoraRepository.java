@@ -5,8 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DesenvolvedoraRepository extends JpaRepository<Desenvolvedora, Long> {
+public interface DesenvolvedoraRepository
+        extends JpaRepository<Desenvolvedora, Long> {
 
     boolean existsByCnpj(String cnpj);
 
+    boolean existsByCnpjAndIdNot(String cnpj, Long id);
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.curso.jogo2026.domain.Jogo;
+import com.curso.jogo2026.domain.Status;
 import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,24 +61,34 @@ public class GeneroJogo {
     public void adicionarJogo(Jogo jogo) {
         Objects.requireNonNull(jogo, "Jogo é obrigatório");
 
-        boolean codigoJaUtilizado = jogos.stream()
-                .map(Jogo::getCodigoBarras)
-                .filter(Objects::nonNull)
-                .anyMatch(codigo ->
-                        codigo.equalsIgnoreCase(jogo.getCodigoBarras())
-                );
+        validarInclusao(jogo);
 
-        if (codigoJaUtilizado) {
-            throw new RecursoDuplicadoException(
-                    "Código de barras já utilizado no gênero"
-            );
+        if (jogo.getGenero() != this) {
+            jogo.associarAo(this);
         }
 
-        jogo.associarAo(this);
+        adicionarInternamente(jogo);
+    }
 
+    void validarInclusao(Jogo jogo) {
+        boolean codigoDuplicado = jogos.stream()
+                .anyMatch(existente -> existente != jogo
+                        && existente.getCodigoBarras()
+                                .equals(jogo.getCodigoBarras()));
+        if (codigoDuplicado) {
+            throw new RecursoDuplicadoException(
+                    "Código de barras já utilizado no gênero");
+        }
+    }
+
+    void adicionarInternamente(Jogo jogo) {
         if (!jogos.contains(jogo)) {
             jogos.add(jogo);
         }
+    }
+
+    void removerInternamente(Jogo jogo) {
+        jogos.remove(jogo);
     }
 
     public void ativar() {
@@ -85,6 +97,15 @@ public class GeneroJogo {
 
     public void inativar() {
         this.status = Status.INATIVO;
+    }
+
+    public void alterarStatus(Status novoStatus) {
+        Objects.requireNonNull(novoStatus, "Status é obrigatório");
+        if (novoStatus == Status.ATIVO) {
+            ativar();
+        } else {
+            inativar();
+        }
     }
 
     public String getNome() {

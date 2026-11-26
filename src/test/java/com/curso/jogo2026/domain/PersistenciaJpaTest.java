@@ -1,18 +1,20 @@
 package com.curso.jogo2026.domain;
 
-import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 
-import org.junit.jupiter.api.Assertions;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,6 +25,9 @@ class PersistenciaJpaTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     @Transactional
@@ -51,17 +56,20 @@ class PersistenciaJpaTest {
 
         assertEquals("RPG", recuperado.getGenero().getNome());
         assertEquals("Elden Ring", recuperado.getTitulo());
-        assertEquals(0, recuperado.getEstoqueMinimo().compareTo(BigDecimal.ZERO));
+        assertEquals(
+                0,
+                recuperado.getEstoqueMinimo().compareTo(BigDecimal.ZERO)
+        );
     }
 
     @Test
     @Transactional
-    void deveRegistrarDezesseisChangeSets() {
+    void deveRegistrarDezenoveChangeSets() {
         Number total = (Number) entityManager
                 .createNativeQuery("select count(*) from databasechangelog")
                 .getSingleResult();
 
-        assertEquals(18L, total.longValue());
+        assertEquals(19L, total.longValue());
     }
 
     @Test
@@ -69,27 +77,32 @@ class PersistenciaJpaTest {
     void deveRejeitarCodigoDeBarrasDuplicado() {
         GeneroJogo genero = new GeneroJogo("Ação");
 
-        Jogo jogo1 = new Jogo(
-                "7891000000033",
-                "Elden Ring",
-                new BigDecimal("10.000"),
-                new BigDecimal("129.90"),
-                LocalDate.now()
-        );
-
-        Jogo jogo2 = new Jogo(
-                "7891000000033",
-                "Elden Ring Remastered",
-                new BigDecimal("10.000"),
-                new BigDecimal("129.90"),
-                LocalDate.now()
-        );
+        Jogo jogo1 = novoJogo("7891000000033");
+        Jogo jogo2 = novoJogo("7891000000033");
 
         genero.adicionarJogo(jogo1);
 
-        Assertions.assertThrows(
-                RecursoDuplicadoException.class,
-                () -> genero.adicionarJogo(jogo2)
+        entityManager.persist(genero);
+        entityManager.persist(jogo1);
+        entityManager.flush();
+
+        Long generoId = genero.getId();
+
+        entityManager.clear();
+
+        GeneroJogo generoSalvo = entityManager.find(
+                GeneroJogo.class,
+                generoId
+        );
+
+        jogo2.associarAo(generoSalvo);
+
+        assertThrows(
+                ConstraintViolationException.class,
+                () -> {
+                    entityManager.persist(jogo2);
+                    entityManager.flush();
+                }
         );
     }
 
@@ -101,8 +114,9 @@ class PersistenciaJpaTest {
         entityManager.persist(genero);
         entityManager.flush();
 
-        assertThrows(PersistenceException.class, () ->
-                entityManager.createNativeQuery("""
+        assertThrows(
+                PersistenceException.class,
+                () -> entityManager.createNativeQuery("""
                         insert into jogo (
                             codigo_barras,
                             titulo,
@@ -125,6 +139,32 @@ class PersistenciaJpaTest {
                         """)
                         .setParameter("generoId", genero.getId())
                         .executeUpdate()
+        );
+    }
+
+    @Test
+    @Transactional
+    void bancoImpedeNomeDeGeneroDuplicadoIgnorandoCaixaEEspacos()
+            throws Exception {
+        String sufixo = UUID.randomUUID().toString();
+        String nome = "Papelaria " + sufixo;
+        jdbcTemplate.update(
+                "INSERT INTO genero_jogo (nome, status) VALUES (?, 'ATIVO')",
+                nome);
+
+        assertThrows(DataIntegrityViolationException.class, () ->
+                jdbcTemplate.update(
+                        "INSERT INTO genero_jogo (nome, status) VALUES (?, 'ATIVO')",
+                        "  " + nome.toUpperCase() + "  "));
+    }
+
+    private Jogo novoJogo(String codigoBarras) {
+        return new Jogo(
+                codigoBarras,
+                "God of War Ragnarök",
+                new BigDecimal("3.000"),
+                new BigDecimal("146.99"),
+                LocalDate.of(2022, 11, 9)
         );
     }
 }

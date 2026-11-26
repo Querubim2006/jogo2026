@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-01-unique-nome-normalizado-genero-jogo
+      author: Vitor-Querubim-de-Oliveira
+      comment: Garante unicidade do nome do gênero sem diferenciar maiúsculas e minúsculas.
+      changes:
+        - sql:
+            sql: >
+              CREATE UNIQUE INDEX uk_genero_jogo_nome_lower
+              ON genero_jogo (LOWER(BTRIM(nome)))
+      rollback:
+        - sql:
+            sql: >
+              DROP INDEX uk_genero_jogo_nome_lower

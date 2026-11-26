@@ -1,9 +1,13 @@
+
 package com.curso.jogo2026.service;
 
 import com.curso.jogo2026.domain.Desenvolvedora;
 import com.curso.jogo2026.exception.RecursoDuplicadoException;
+import com.curso.jogo2026.exception.RecursoEmUsoException;
 import com.curso.jogo2026.exception.RecursoNaoEncontradoException;
 import com.curso.jogo2026.repository.DesenvolvedoraRepository;
+import com.curso.jogo2026.repository.JogoRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +17,14 @@ import java.util.List;
 public class DesenvolvedoraService {
 
     private final DesenvolvedoraRepository desenvolvedoraRepository;
+    private final JogoRepository jogoRepository;
 
     public DesenvolvedoraService(
-            DesenvolvedoraRepository desenvolvedoraRepository
+            DesenvolvedoraRepository desenvolvedoraRepository,
+            JogoRepository jogoRepository
     ) {
         this.desenvolvedoraRepository = desenvolvedoraRepository;
+        this.jogoRepository = jogoRepository;
     }
 
     @Transactional
@@ -87,6 +94,13 @@ public class DesenvolvedoraService {
                         )
                 );
 
+        if (jogoRepository.existsByDesenvolvedoraId(id)) {
+            throw new RecursoEmUsoException(
+                    "Desenvolvedora não pode ser excluída porque possui jogos associados"
+            );
+        }
+
         desenvolvedoraRepository.delete(desenvolvedora);
+        desenvolvedoraRepository.flush();
     }
 }

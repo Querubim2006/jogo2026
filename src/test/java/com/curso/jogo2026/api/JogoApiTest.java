@@ -225,6 +225,9 @@ class JogoApiTest {
     void deveListarJogos() throws Exception {
         mockMvc.perform(get("/api/jogos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.conteudo").isArray())
+                .andExpect(jsonPath("$.pagina").exists())
+                .andExpect(jsonPath("$.tamanho").exists())
+                .andExpect(jsonPath("$.totalElementos").exists());
     }
 }

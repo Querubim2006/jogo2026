@@ -1,0 +1,27 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 008-preservar-estoque-minimo-anterior
+      author: Vitor-Querubim-de-Oliveira
+
+      changes:
+        - createTable:
+            tableName: jogo_estoque_minimo_backup
+            columns:
+              - column:
+                  name: id_jogo
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+        - sql:
+            sql: |
+              INSERT INTO jogo_estoque_minimo_backup (id_jogo)
+              SELECT id
+              FROM jogo
+              WHERE estoque_minimo = 0;
+
+      rollback:
+        - dropTable:
+            tableName: jogo_estoque_minimo_backup
