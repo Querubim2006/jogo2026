@@ -71,6 +71,10 @@ public class Jogo {
     )
     private Desenvolvedora desenvolvedora;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fornecedor_id", foreignKey = @ForeignKey(name = "fk_jogo_fornecedor"))
+    private Fornecedor fornecedor;
+
     protected Jogo() {
     }
 
@@ -289,6 +293,10 @@ public class Jogo {
     public Desenvolvedora getDesenvolvedora() {
         return desenvolvedora;
     }
+
+    public void associarFornecedor(Fornecedor fornecedor) { this.fornecedor = fornecedor; }
+
+    public Fornecedor getFornecedor() { return fornecedor; }
 
     private static String validarTextoObrigatorio(
             String texto,

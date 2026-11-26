@@ -18,19 +18,21 @@ public interface JogoRepository
 
     boolean existsByDesenvolvedoraId(Long desenvolvedoraId);
 
+    boolean existsByFornecedorId(Long fornecedorId);
+
     boolean existsByCodigoBarras(String codigoBarras);
 
     boolean existsByGeneroId(Long generoId);
 
-    @EntityGraph(attributePaths = {"genero", "desenvolvedora"})
+    @EntityGraph(attributePaths = {"genero", "desenvolvedora", "fornecedor"})
     Optional<Jogo> findById(Long id);
 
     @Override
-    @EntityGraph(attributePaths = {"genero", "desenvolvedora"})
+    @EntityGraph(attributePaths = {"genero", "desenvolvedora", "fornecedor"})
     List<Jogo> findAll();
 
     @Override
-    @EntityGraph(attributePaths = {"genero", "desenvolvedora"})
+    @EntityGraph(attributePaths = {"genero", "desenvolvedora", "fornecedor"})
     Page<Jogo> findAll(
             Specification<Jogo> specification,
             Pageable pageable

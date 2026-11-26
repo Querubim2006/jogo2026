@@ -38,12 +38,12 @@ public class JogoController {
         this.mapper = mapper;
     }
 
-    @Operation(summary = "Cadastrar jogo", description = "Cria um jogo ativo associado a um gênero e, opcionalmente, a uma desenvolvedora.")
+    @Operation(summary = "Cadastrar jogo", description = "Cria um jogo ativo associado a um gênero e, opcionalmente, a uma desenvolvedora e a um fornecedor.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Jogo cadastrado"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "404", description = "Gênero ou desenvolvedora não encontrada",
+            @ApiResponse(responseCode = "404", description = "Gênero, desenvolvedora ou fornecedor não encontrado",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "409", description = "Código de barras já utilizado",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
@@ -51,7 +51,7 @@ public class JogoController {
     @PostMapping
     public ResponseEntity<JogoResponse> cadastrar(@Valid @RequestBody JogoRequest request) {
         Jogo jogo = mapper.toEntity(request);
-        Jogo cadastrado = service.cadastrar(jogo, request.generoId(), request.desenvolvedoraId());
+        Jogo cadastrado = service.cadastrar(jogo, request.generoId(), request.desenvolvedoraId(), request.fornecedorId());
         URI location = URI.create("/api/jogos/" + cadastrado.getId());
         return ResponseEntity.created(location).body(mapper.toResponse(cadastrado));
     }
@@ -106,7 +106,7 @@ public class JogoController {
             @ApiResponse(responseCode = "200", description = "Jogo alterado"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
-            @ApiResponse(responseCode = "404", description = "Jogo, gênero ou desenvolvedora não encontrada",
+            @ApiResponse(responseCode = "404", description = "Jogo, gênero, desenvolvedora ou fornecedor não encontrado",
                     content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "409", description = "Conflito com uma restrição de integridade",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
@@ -118,7 +118,7 @@ public class JogoController {
             @Valid @RequestBody JogoAtualizacaoRequest request) {
         Jogo alterado = service.alterar(
                 id, request.titulo(), request.valorUnitario(), request.dataLancamento(),
-                request.estoqueMinimo(), request.generoId(), request.desenvolvedoraId());
+                request.estoqueMinimo(), request.generoId(), request.desenvolvedoraId(), request.fornecedorId());
         return mapper.toResponse(alterado);
     }
 

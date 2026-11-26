@@ -35,6 +35,10 @@ public record JogoResponse(
         Long desenvolvedoraId,
         @Schema(description = "Nome da desenvolvedora", example = "Estúdio Exemplo",
                 nullable = true)
-        String desenvolvedoraNome
+        String desenvolvedoraNome,
+        @Schema(description = "Identificador do fornecedor", example = "1", nullable = true)
+        Long fornecedorId,
+        @Schema(description = "Razão social do fornecedor", example = "Distribuidora Exemplo", nullable = true)
+        String fornecedorRazaoSocial
 ){
 }

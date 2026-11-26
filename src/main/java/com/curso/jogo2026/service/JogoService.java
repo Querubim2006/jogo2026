@@ -5,11 +5,13 @@ import com.curso.jogo2026.domain.Desenvolvedora;
 import com.curso.jogo2026.domain.GeneroJogo;
 import com.curso.jogo2026.domain.Jogo;
 import com.curso.jogo2026.domain.Status;
+import com.curso.jogo2026.domain.Fornecedor;
 import com.curso.jogo2026.exception.RecursoDuplicadoException;
 import com.curso.jogo2026.exception.RecursoNaoEncontradoException;
 import com.curso.jogo2026.repository.DesenvolvedoraRepository;
 import com.curso.jogo2026.repository.GeneroJogoRepository;
 import com.curso.jogo2026.repository.JogoRepository;
+import com.curso.jogo2026.repository.FornecedorRepository;
 import com.curso.jogo2026.specification.JogoSpecification;
 
 import org.springframework.data.domain.Page;
@@ -30,15 +32,18 @@ public class JogoService {
     private final JogoRepository jogoRepository;
     private final GeneroJogoRepository generoRepository;
     private final DesenvolvedoraRepository desenvolvedoraRepository;
+    private final FornecedorRepository fornecedorRepository;
 
     public JogoService(
             JogoRepository jogoRepository,
             GeneroJogoRepository generoRepository,
-            DesenvolvedoraRepository desenvolvedoraRepository
+            DesenvolvedoraRepository desenvolvedoraRepository,
+            FornecedorRepository fornecedorRepository
     ) {
         this.jogoRepository = jogoRepository;
         this.generoRepository = generoRepository;
         this.desenvolvedoraRepository = desenvolvedoraRepository;
+        this.fornecedorRepository = fornecedorRepository;
     }
 
     @Transactional
@@ -47,6 +52,11 @@ public class JogoService {
             Long generoId,
             Long desenvolvedoraId
     ) {
+        return cadastrar(jogo, generoId, desenvolvedoraId, null);
+    }
+
+    @Transactional
+    public Jogo cadastrar(Jogo jogo, Long generoId, Long desenvolvedoraId, Long fornecedorId) {
         if (jogoRepository.existsByCodigoBarras(jogo.getCodigoBarras())) {
             throw new RecursoDuplicadoException(
                     "Código de barras já cadastrado"
@@ -72,6 +82,12 @@ public class JogoService {
                             );
 
             jogo.associarDesenvolvedora(desenvolvedora);
+        }
+
+        if (fornecedorId != null) {
+            Fornecedor fornecedor = fornecedorRepository.findById(fornecedorId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Fornecedor não encontrado"));
+            jogo.associarFornecedor(fornecedor);
         }
 
         return jogoRepository.save(jogo);
@@ -199,6 +215,13 @@ public class JogoService {
             Long generoId,
             Long desenvolvedoraId
     ) {
+        return alterar(id, titulo, valorUnitario, dataLancamento, estoqueMinimo, generoId, desenvolvedoraId, null);
+    }
+
+    @Transactional
+    public Jogo alterar(Long id, String titulo, BigDecimal valorUnitario,
+                        LocalDate dataLancamento, BigDecimal estoqueMinimo,
+                        Long generoId, Long desenvolvedoraId, Long fornecedorId) {
         Jogo jogoExistente = jogoRepository.findById(id)
                 .orElseThrow(() ->
                         new RecursoNaoEncontradoException(
@@ -234,6 +257,11 @@ public class JogoService {
         }
 
         jogoExistente.associarDesenvolvedora(desenvolvedora);
+
+        Fornecedor fornecedor = fornecedorId == null ? null
+                : fornecedorRepository.findById(fornecedorId).orElseThrow(() ->
+                        new RecursoNaoEncontradoException("Fornecedor não encontrado"));
+        jogoExistente.associarFornecedor(fornecedor);
 
         return jogoExistente;
     }

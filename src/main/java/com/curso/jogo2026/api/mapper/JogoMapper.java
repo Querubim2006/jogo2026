@@ -38,7 +38,9 @@ public class JogoMapper {
                 jogo.getGenero().getId(),
                 jogo.getGenero().getNome(),
                 desenvolvedora == null ? null : desenvolvedora.getId(),
-                desenvolvedora == null ? null : desenvolvedora.getNomeFantasia()
+                desenvolvedora == null ? null : desenvolvedora.getNomeFantasia(),
+                jogo.getFornecedor() == null ? null : jogo.getFornecedor().getId(),
+                jogo.getFornecedor() == null ? null : jogo.getFornecedor().getRazaoSocial()
         );
     }
 }

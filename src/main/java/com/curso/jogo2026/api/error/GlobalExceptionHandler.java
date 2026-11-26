@@ -54,9 +54,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<ApiError> tratarRegraInvalida(
-            IllegalArgumentException ex,
+            RuntimeException ex,
             HttpServletRequest request
     ) {
         return criarResposta(
