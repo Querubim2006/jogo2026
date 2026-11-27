@@ -13,6 +13,8 @@ import com.curso.jogo2026.repository.GeneroJogoRepository;
 import com.curso.jogo2026.repository.JogoRepository;
 import com.curso.jogo2026.repository.FornecedorRepository;
 import com.curso.jogo2026.specification.JogoSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,17 +35,20 @@ public class JogoService {
     private final GeneroJogoRepository generoRepository;
     private final DesenvolvedoraRepository desenvolvedoraRepository;
     private final FornecedorRepository fornecedorRepository;
+    private final EntityManager entityManager;
 
     public JogoService(
             JogoRepository jogoRepository,
             GeneroJogoRepository generoRepository,
             DesenvolvedoraRepository desenvolvedoraRepository,
-            FornecedorRepository fornecedorRepository
+            FornecedorRepository fornecedorRepository,
+            EntityManager entityManager
     ) {
         this.jogoRepository = jogoRepository;
         this.generoRepository = generoRepository;
         this.desenvolvedoraRepository = desenvolvedoraRepository;
         this.fornecedorRepository = fornecedorRepository;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -278,6 +283,7 @@ public class JogoService {
                         )
                 );
 
+        entityManager.refresh(jogo, LockModeType.PESSIMISTIC_WRITE);
         jogo.receberEstoque(quantidade);
 
         return jogo;
@@ -295,6 +301,7 @@ public class JogoService {
                         )
                 );
 
+        entityManager.refresh(jogo, LockModeType.PESSIMISTIC_WRITE);
         jogo.retirarEstoque(quantidade);
 
         return jogo;
