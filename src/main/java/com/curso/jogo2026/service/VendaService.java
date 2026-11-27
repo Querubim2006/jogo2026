@@ -3,6 +3,8 @@ package com.curso.jogo2026.service;
 import com.curso.jogo2026.domain.*;
 import com.curso.jogo2026.exception.RecursoNaoEncontradoException;
 import com.curso.jogo2026.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,10 +22,13 @@ public class VendaService {
     private final ClienteRepository clienteRepository;
     private final ColaboradorRepository colaboradorRepository;
     private final JogoRepository jogoRepository;
+    private final EntityManager entityManager;
     public VendaService(VendaRepository vendaRepository, ClienteRepository clienteRepository,
-                        ColaboradorRepository colaboradorRepository, JogoRepository jogoRepository) {
+                        ColaboradorRepository colaboradorRepository, JogoRepository jogoRepository,
+                        EntityManager entityManager) {
         this.vendaRepository = vendaRepository; this.clienteRepository = clienteRepository;
         this.colaboradorRepository = colaboradorRepository; this.jogoRepository = jogoRepository;
+        this.entityManager = entityManager;
     }
     @Transactional public Venda cadastrar(Long clienteId, Long vendedorId) {
         Cliente cliente = clienteRepository.findOneById(clienteId).orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado"));
@@ -53,9 +59,15 @@ public class VendaService {
     @Transactional public Venda finalizar(Long id) {
         Venda venda = buscarEntidade(id);
         validarParticipantes(venda.getCliente(), venda.getVendedor());
-        for (ItemVenda item : venda.getItens()) {
-            if (item.getProduto().getStatus() != Status.ATIVO) throw new IllegalArgumentException("Todos os jogos da venda devem estar ativos");
-            item.getProduto().retirarEstoque(item.getQuantidade());
+        List<ItemVenda> itensOrdenados = venda.getItens().stream()
+                .sorted(Comparator.comparing(item -> item.getProduto().getId()))
+                .toList();
+
+        for (ItemVenda item : itensOrdenados) {
+            Jogo jogo = item.getProduto();
+            entityManager.refresh(jogo, LockModeType.PESSIMISTIC_WRITE);
+            if (jogo.getStatus() != Status.ATIVO) throw new IllegalArgumentException("Todos os jogos da venda devem estar ativos");
+            jogo.retirarEstoque(item.getQuantidade());
         }
         venda.finalizar();
         return venda;
